@@ -1,34 +1,43 @@
 ﻿using System.Linq;
+using NGitLab.Models;
 using NUnit.Framework;
+using Shouldly;
 
-namespace NGitLab.Tests.RepositoryClient
-{
-    public class RepositoryClientTests
-    {
-        private readonly IRepositoryClient _repo;
+namespace NGitLab.Tests.RepositoryClient {
+    public class RepositoryClientTests {
+        readonly IRepositoryClient repo;
 
-        public RepositoryClientTests()
-        {
-            _repo = _RepositoryClientTests.RepositoryClient;
+        public RepositoryClientTests() {
+            repo = _RepositoryClientTests.RepositoryClient;
         }
 
         [Test]
-        public void GetAllCommits()
-        {
-            CollectionAssert.IsNotEmpty(_repo.Commits.ToArray());
+        [Category("Server_Required")]
+        public void GetAllCommits() {
+            repo.Commits.ShouldNotBeEmpty();
         }
 
         [Test]
-        public void GetCommitBySha1()
-        {
-            var sha1 = new Sha1("8c89dcaf09dfad151e182b81918e0530b9019ac4");
-            Assert.AreEqual(sha1, _repo.GetCommit(sha1).Id);
+        [Category("Server_Required")]
+        public void GetCommitBySha1() {
+            var commits = repo.Commits.First().Id;
+            repo.GetCommit(commits).Id.ShouldNotBeNull();
         }
 
         [Test]
-        public void GetCommitDiff()
-        {
-            CollectionAssert.IsNotEmpty(_repo.GetCommitDiff(_repo.Commits.First().Id).ToArray());
+        [Category("Server_Required")]
+        public void GetCommitDiff() {
+            repo.GetCommitDiff(repo.Commits.First().Id).ShouldNotBeEmpty();
+        }
+
+        [Test]
+        [Category("Server_Required")]
+        public void CreateTag() {
+            var tagCreate = new TagCreate();
+            tagCreate.Ref = "master";
+            tagCreate.TagName = "my_test_tag";
+
+            Assert.IsNotNull(repo.CreateTag(tagCreate));
         }
     }
 }

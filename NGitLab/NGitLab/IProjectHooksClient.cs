@@ -1,14 +1,12 @@
 ﻿using System.Collections.Generic;
 using NGitLab.Models;
 
-namespace NGitLab
-{
-    public interface IProjectHooksClient
-    {
+namespace NGitLab {
+    public interface IProjectHooksClient {
         IEnumerable<ProjectHook> All { get; }
-        ProjectHook this[int hookId] { get; }
-        ProjectHook Create(ProjectHookUpsert hook);
-        ProjectHook Update(int hookId, ProjectHookUpsert hook);
+        ProjectHook Get(int hookId);
+        ProjectHook Create(ProjectHookInsert hook);
+        ProjectHook Update(ProjectHookUpdate hook);
         void Delete(int hookId);
     }
 }

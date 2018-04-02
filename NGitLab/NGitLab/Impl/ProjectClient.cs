@@ -1,57 +1,51 @@
 ﻿using System.Collections.Generic;
 using NGitLab.Models;
 
-namespace NGitLab.Impl
-{
-    public class ProjectClient : IProjectClient
-    {
-        private readonly API _api;
+namespace NGitLab.Impl {
+    public class ProjectClient : IProjectClient {
+        readonly Api api;
 
-        public ProjectClient(API api)
-        {
-            _api = api;
+        public ProjectClient(Api api) {
+            this.api = api;
         }
 
-        public IEnumerable<Project> Accessible
+        public IEnumerable<Project> Accessible() {
+            return api.Get().GetAll<Project>(Project.Url);
+        }
+        
+        public IEnumerable<Project> Owned() {
+            return api.Get().GetAll<Project>(Project.Url + "/?owned=true");
+        }
+        public IEnumerable<Project> Membership()
         {
-            get
-            {
-                return _api.Get().GetAll<Project>(Project.Url);
-            }
+            return api.Get().GetAll<Project>(Project.Url + "/?membership=true");
+        }
+        
+        public IEnumerable<Project> Starred() {
+            return api.Get().GetAll<Project>(Project.Url + "/?starred=true");
         }
 
-        public IEnumerable<Project> Owned
-        {
-            get
-            {
-                return _api.Get().GetAll<Project>(Project.Url + "/owned");
-            }
+        public Project Get(int id) {
+            return api.Get().To<Project>(Project.Url + "/" + id);
         }
 
-        public IEnumerable<Project> All
+
+        public Project Get(string namespacedpath)
         {
-            get
-            {
-                return _api.Get().GetAll<Project>(Project.Url + "/all");
-            }
+            return api.Get().To<Project>(Project.Url + "/" +  namespacedpath.Replace("/", "%2F"));
         }
 
-        public Project this[int id]
-        {
-            get
-            {
-                return _api.Get().To<Project>(Project.Url + "/" + id);
-            }
+
+        public Project Create(ProjectCreate project) {
+            return api.Post().With(project).To<Project>(Project.Url);
         }
 
-        public Project Create(ProjectCreate project)
-        {
-            return _api.Post().With(project).To<Project>(Project.Url);
+        public bool Delete(int id) {
+            return api.Delete().To<Project>(Project.Url + "/" + id).Id == default(int);
         }
 
-        public void Delete(int id)
-        {
-            _api.Delete().To<Project>(Project.Url + "/" + id);
+        public Project Star(int id) {
+            return api.Post().To<Project>(Project.Url + "/" + id + "/star");
         }
     }
 }

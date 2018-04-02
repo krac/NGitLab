@@ -1,14 +1,12 @@
 ﻿using System.Runtime.Serialization;
 
-namespace NGitLab.Models
-{
+namespace NGitLab.Models {
     [DataContract]
-    public class PersonInfo
-    {
+    public class PersonInfo {
         [DataMember(Name = "name")]
-        public string Name;
+        public string Name { get; set; }
 
         [DataMember(Name = "email")]
-        public string Email;
+        public string Email { get; set; }
     }
 }

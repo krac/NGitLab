@@ -1,13 +1,10 @@
-﻿namespace NGitLab.Tests
-{
-    public static class Config
-    {
-        public const string ServiceUrl = "http://localhost:1081";
-        public const string Secret = "r8pHJ3khRNsNY5yCZ9zK";
+﻿namespace NGitLab.Tests {
+    public static class Config {
+        public const string ServiceUrl = "https://gitclub.cn";
+        public const string Secret = "y1ZcmHSidM4bqwYzjFPU";
 
-        public static GitLabClient Connect()
-        {
-            return GitLabClient.Connect(ServiceUrl, Secret);
+        public static GitLabClient Connect() {
+            return GitLabClient.Connect(ServiceUrl,"maikebing","285220Myh", Impl.Api.ApiVersion.V4_Oauth);
         }
     }
 }

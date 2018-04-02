@@ -1,29 +1,16 @@
 ﻿using System.Collections.Generic;
 using NGitLab.Models;
 
-namespace NGitLab
-{
-    public interface IProjectClient
-    {
-        /// <summary>
-        /// Get a list of projects accessible by the authenticated user.
-        /// </summary>
-        IEnumerable<Project> Accessible { get; }
-
-        /// <summary>
-        /// Get a list of projects owned by the authenticated user.
-        /// </summary>
-        IEnumerable<Project> Owned { get; }
-
-        /// <summary>
-        /// Get a list of all GitLab projects (admin only).
-        /// </summary>
-        IEnumerable<Project> All { get; }
-
-        Project this[int id] { get; }
-
+namespace NGitLab {
+    public interface IProjectClient {
+        IEnumerable<Project> Accessible();
+        IEnumerable<Project> Owned();
+        IEnumerable<Project> Membership();
+        IEnumerable<Project> Starred();
+        Project Get(int id);
+        Project Get(string namespacedpath);
         Project Create(ProjectCreate project);
-        
-        void Delete(int id);
+        bool Delete(int id);
+        Project Star(int id);
     }
 }

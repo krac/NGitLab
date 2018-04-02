@@ -2,69 +2,83 @@
 using System.Linq;
 using NGitLab.Models;
 using NUnit.Framework;
+using Shouldly;
 
-namespace NGitLab.Tests.RepositoryClient
-{
-    public class ProjectHooksClientTests
-    {
-        private readonly IProjectHooksClient _hooks;
+namespace NGitLab.Tests.RepositoryClient {
+    public class ProjectHooksClientTests {
+        readonly IProjectClient projects;
 
-        public ProjectHooksClientTests()
-        {
-            _hooks = _RepositoryClientTests.RepositoryClient.ProjectHooks;
+        public ProjectHooksClientTests() {
+            projects = Config.Connect().Projects;
         }
 
         [Test]
-        public void GetAll()
-        {
-            CollectionAssert.IsEmpty(_hooks.All.ToArray());
+        [Category("Server_Required")]
+        public void CreateUpdateDelete() {
+            Project proj = null;
+            try {
+                CreateProject(out proj, "Test Create Hook");
+
+                var hooks = Config.Connect().GetRepository(proj.Id).ProjectHooks;
+
+                var toCreate = new ProjectHookInsert {
+                    MergeRequestsEvents = true,
+                    PushEvents = true,
+                    Url = new Uri("http://scooletz.com"),
+                    Id = proj.Id
+                };
+
+                var createdHook = hooks.Create(toCreate);
+                hooks.All.Count().ShouldBe(1);
+
+                createdHook.MergeRequestsEvents.ShouldBe(toCreate.MergeRequestsEvents);
+                createdHook.PushEvents.ShouldBe(toCreate.PushEvents);
+                createdHook.Url.ShouldBe(toCreate.Url);
+
+                var toUpdate = new ProjectHookUpdate {
+                    MergeRequestsEvents = true,
+                    PushEvents = true,
+                    TagPushEvents = true,
+                    Url = new Uri("http://scooletz.com"),
+                    Id = proj.Id,
+                    HookId = createdHook.Id
+                };
+
+                var updated = hooks.Update(toUpdate);
+
+                hooks.All.Count().ShouldBe(1);
+
+                Assert.AreEqual(toUpdate.MergeRequestsEvents, updated.MergeRequestsEvents);
+                Assert.AreEqual(toUpdate.PushEvents, updated.PushEvents);
+                Assert.AreEqual(toUpdate.Url, updated.Url);
+
+                hooks.Delete(updated.Id);
+
+                hooks.All.ShouldBeEmpty();
+            }
+            finally {
+                if (proj != null)
+                    projects.Delete(proj.Id);
+            }
         }
 
-        [Test]
-        public void CreateUpdateDelete()
-        {
-            var toCreate = new ProjectHookUpsert
-            {
-                MergeRequestsEvents = true,
-                PushEvents = true,
-                Url = new Uri("http://scooletz.com"),
+        ProjectCreate CreateProject(out Project created, string name) {
+            var p = new ProjectCreate {
+                Description = "desc",
+                ImportUrl = null,
+                IssuesEnabled = true,
+                MergeRequestsEnabled = true,
+                Name = name,
+                NamespaceId = 0,
+                SnippetsEnabled = true,
+                VisibilityLevel = VisibilityLevel.Public,
+                WallEnabled = true,
+                WikiEnabled = true
             };
 
-            var created = _hooks.Create(toCreate);
-            ThereIsOneHook();
+            created = projects.Create(p);
 
-            Assert.AreEqual(toCreate.MergeRequestsEvents, created.MergeRequestsEvents);
-            Assert.AreEqual(toCreate.PushEvents, created.PushEvents);
-            Assert.AreEqual(toCreate.Url, created.Url);
-
-            var toUpdate = new ProjectHookUpsert
-            {
-                MergeRequestsEvents = false,
-                PushEvents = false,
-                Url = new Uri("http://git.scooletz.com"),
-            };
-
-            var updated = _hooks.Update(created.Id, toUpdate);
-
-            ThereIsOneHook();
-
-            Assert.AreEqual(toUpdate.MergeRequestsEvents, updated.MergeRequestsEvents);
-            Assert.AreEqual(toUpdate.PushEvents, updated.PushEvents);
-            Assert.AreEqual(toUpdate.Url, updated.Url);
-
-            _hooks.Delete(updated.Id);
-
-            ThereIsNoHook();
-        }
-
-        private void ThereIsOneHook()
-        {
-            Assert.AreEqual(1, _hooks.All.ToArray().Length);
-        }
-
-        private void ThereIsNoHook()
-        {
-            CollectionAssert.IsEmpty(_hooks.All.ToArray());
+            return p;
         }
     }
 }

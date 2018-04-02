@@ -1,42 +1,33 @@
 ﻿using System.Collections.Generic;
 using NGitLab.Models;
 
-namespace NGitLab.Impl
-{
-    public class ProjectHooksClient : IProjectHooksClient
-    {
-        private readonly API _api;
-        private readonly string _path;
+namespace NGitLab.Impl {
+    public class ProjectHooksClient : IProjectHooksClient {
+        readonly Api api;
+        readonly string path;
 
-        public ProjectHooksClient(API api, string projectPath)
-        {
-            _api = api;
-            _path = projectPath + "/hooks";
+        public ProjectHooksClient(Api api, string projectPath) {
+            this.api = api;
+            path = projectPath + "/hooks";
         }
 
-        public IEnumerable<ProjectHook> All
-        {
-            get { return _api.Get().GetAll<ProjectHook>(_path); }
+        public IEnumerable<ProjectHook> All => api.Get().GetAll<ProjectHook>(path);
+        
+
+        public ProjectHook Get(int hookId) {
+            return api.Get().To<ProjectHook>(path + "/" + hookId);
         }
 
-        public ProjectHook this[int hookId]
-        {
-            get { return _api.Get().To<ProjectHook>(_path + "/" + hookId); }
+        public ProjectHook Create(ProjectHookInsert hook) {
+            return api.Post().With(hook).To<ProjectHook>(path);
         }
 
-        public ProjectHook Create(ProjectHookUpsert hook)
-        {
-            return _api.Post().With(hook).To<ProjectHook>(_path);
+        public ProjectHook Update(ProjectHookUpdate hook) {
+            return api.Put().With(hook).To<ProjectHook>(path + "/" + hook.HookId);
         }
 
-        public ProjectHook Update(int hookId, ProjectHookUpsert hook)
-        {
-            return _api.Put().With(hook).To<ProjectHook>(_path + "/" + hookId);
-        }
-
-        public void Delete(int hookId)
-        {
-            _api.Delete().To<ProjectHook>(_path + "/" + hookId);
+        public void Delete(int hookId) {
+            api.Delete().To<ProjectHook>(path + "/" + hookId);
         }
     }
 }

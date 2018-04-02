@@ -1,17 +1,15 @@
 ﻿using System.Runtime.Serialization;
 
-namespace NGitLab.Models
-{
+namespace NGitLab.Models {
     [DataContract]
-    public class Branch
-    {
+    public class Branch {
         [DataMember(Name = "name")]
-        public string Name;
+        public string Name { get; set; }
 
         [DataMember(Name = "commit")]
-        public CommitInfo Commit;
+        public CommitInfo Commit { get; set; }
 
         [DataMember(Name = "protected")]
-        public bool Protected;
+        public bool Protected { get; set; }
     }
 }
